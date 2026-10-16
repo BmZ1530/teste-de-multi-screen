@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tela dividida</title>
+<style>
+  html, body { height: 100%; margin: 0; overflow: hidden; background: #14171c; }
+  .split { display: flex; height: 100%; width: 100%; position: relative; }
+  .pane { min-width: 0; overflow: hidden; }
+  #paneA { flex: 0 0 50%; }
+  #paneB { flex: 1 1 0; }
+  iframe { width: 100%; height: 100%; border: 0; background: #fff; display: block; }
+  .divider { flex: 0 0 10px; background: #2c323b; cursor: col-resize; position: relative; touch-action: none; }
+  .divider::after { content: ""; position: absolute; left: 50%; top: 50%; width: 3px; height: 48px;
+    transform: translate(-50%, -50%); border-radius: 2px; background: #8f98a6; }
+  .divider:hover, .divider.dragging { background: #3a424d; }
+  .divider:focus-visible { outline: 2px solid #4da3ff; outline-offset: -2px; }
+  .shield { position: absolute; inset: 0; z-index: 10; display: none; cursor: col-resize; }
+  .split.dragging .shield { display: block; }
+  @media (max-width: 640px) {
+    .split { flex-direction: column; }
+    .divider { cursor: row-resize; }
+    .divider::after { width: 48px; height: 3px; }
+    .shield { cursor: row-resize; }
+  }
+</style>
+</head>
+<body>
+<div class="split" id="split">
+  <div class="pane" id="paneA">
+    <iframe id="frameA" title="Lado esquerdo" src="https://moodle-code.inatel.br/login/index.php"></iframe>
+  </div>
+  <div class="divider" id="divider" role="separator" tabindex="0"
+       aria-label="Arraste para redimensionar; até a borda para esconder um lado; clique duas vezes para centralizar"></div>
+  <div class="pane" id="paneB">
+    <iframe id="frameB" title="Lado direito" src="https://gemini.google.com/app"></iframe>
+  </div>
+  <div class="shield" id="shield"></div>
+</div>
+<script src="tela.js"></script>
+</body>
+</html>

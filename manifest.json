@@ -1,0 +1,19 @@
+{
+  "manifest_version": 3,
+  "name": "Tela dividida",
+  "version": "1.0",
+  "description": "Abre duas páginas lado a lado, liberando a exibição em quadros do Moodle Inatel e do Gemini.",
+  "permissions": ["declarativeNetRequest"],
+  "host_permissions": [
+    "https://moodle-code.inatel.br/*",
+    "https://gemini.google.com/*",
+    "https://accounts.google.com/*"
+  ],
+  "background": { "service_worker": "background.js" },
+  "action": { "default_title": "Abrir tela dividida" },
+  "declarative_net_request": {
+    "rule_resources": [
+      { "id": "frames", "enabled": true, "path": "rules.json" }
+    ]
+  }
+}
