@@ -8,12 +8,16 @@
   html, body { height: 100%; margin: 0; overflow: hidden; background: #14171c; }
   .split { display: flex; height: 100%; width: 100%; position: relative; }
   .pane { min-width: 0; overflow: hidden; }
-  #paneA { flex: 0 0 50%; }
+  #paneA { flex: 0 0 calc((100% - 10px) * 0.5); }
   #paneB { flex: 1 1 0; }
   iframe { width: 100%; height: 100%; border: 0; background: #fff; display: block; }
-  .divider { flex: 0 0 10px; background: #2c323b; cursor: col-resize; position: relative; touch-action: none; }
-  .divider::after { content: ""; position: absolute; left: 50%; top: 50%; width: 3px; height: 48px;
-    transform: translate(-50%, -50%); border-radius: 2px; background: #8f98a6; }
+  .divider {
+    flex: 0 0 10px; background: #2c323b; cursor: col-resize; position: relative; touch-action: none;
+  }
+  .divider::after {
+    content: ""; position: absolute; left: 50%; top: 50%; width: 3px; height: 48px;
+    transform: translate(-50%, -50%); border-radius: 2px; background: #8f98a6;
+  }
   .divider:hover, .divider.dragging { background: #3a424d; }
   .divider:focus-visible { outline: 2px solid #4da3ff; outline-offset: -2px; }
   .shield { position: absolute; inset: 0; z-index: 10; display: none; cursor: col-resize; }
@@ -32,12 +36,63 @@
     <iframe id="frameA" title="Lado esquerdo" src="https://moodle-code.inatel.br/login/index.php"></iframe>
   </div>
   <div class="divider" id="divider" role="separator" tabindex="0"
-       aria-label="Arraste para redimensionar; até a borda para esconder um lado; clique duas vezes para centralizar"></div>
+       aria-label="Arraste para redimensionar; arraste até a borda para esconder um lado; clique duas vezes para centralizar"></div>
   <div class="pane" id="paneB">
-    <iframe id="frameB" title="Lado direito" src="https://gemini.google.com/app"></iframe>
+    <iframe id="frameB" title="Lado direito" src="https://gemini.google.com/app?is_sa=1&is_sa=1&android-min-version=301356232&ios-min-version=322.0&campaign_id=bkws&utm_source=sem&utm_medium=paid-media&utm_campaign=bkws&pt=9008&mt=8&ct=p-growth-sem-bkws&gclsrc=aw.ds&gad_source=1&gad_campaignid=20437330524&gclid=Cj0KCQjwlsfWBhD4ARIsACL7p1FlEMheutGXe2xr6QGDvzC-LnBYkRfakqrFhL_3gmPHYOetciaax3waArbJEALw_wcB"></iframe>
   </div>
   <div class="shield" id="shield"></div>
 </div>
-<script src="tela.js"></script>
+
+<script>
+(function () {
+  const split = document.getElementById("split");
+  const divider = document.getElementById("divider");
+  const paneA = document.getElementById("paneA");
+  const vertical = () => matchMedia("(max-width: 640px)").matches;
+  let sizeA = 50, dragging = false;
+
+  function apply() { paneA.style.flex = "0 0 calc((100% - 10px) * " + (sizeA / 100) + ")"; }
+
+  function pos(e) {
+    const r = split.getBoundingClientRect();
+    const d = 10; // espessura da barra
+    const v = vertical();
+    const total = (v ? r.height : r.width) - d;
+    const p = (v ? e.clientY - r.top : e.clientX - r.left) - d / 2;
+    return Math.min(100, Math.max(0, (p / total) * 100));
+  }
+
+  divider.addEventListener("pointerdown", (e) => {
+    dragging = true;
+    divider.setPointerCapture(e.pointerId);
+    divider.classList.add("dragging");
+    split.classList.add("dragging");
+    e.preventDefault();
+  });
+  window.addEventListener("pointermove", (e) => {
+    if (!dragging) return;
+    let p = pos(e);
+    if (p < 3) p = 0;       // encosta na borda = esconde o lado
+    if (p > 97) p = 100;
+    sizeA = p; apply();
+  });
+  window.addEventListener("pointerup", () => {
+    dragging = false;
+    divider.classList.remove("dragging");
+    split.classList.remove("dragging");
+  });
+  divider.addEventListener("dblclick", () => { sizeA = 50; apply(); });
+  divider.addEventListener("keydown", (e) => {
+    const step = e.shiftKey ? 10 : 2;
+    const back = vertical() ? "ArrowUp" : "ArrowLeft";
+    const fwd = vertical() ? "ArrowDown" : "ArrowRight";
+    if (e.key === back) sizeA = Math.max(0, sizeA - step);
+    else if (e.key === fwd) sizeA = Math.min(100, sizeA + step);
+    else return;
+    e.preventDefault(); apply();
+  });
+  apply();
+})();
+</script>
 </body>
 </html>
